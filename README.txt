@@ -2,11 +2,9 @@
 Follow the `install.sh` to install pip3 packages
 
 2. Source codes structure
-- `data_src.py`: Represent a tweets file
-- `text_normalization.py`: Used for normalizing text
-- `intensity_classifier.py`: Main file to run with classic models
+- `classical` folder: For running classical models
+- `deep_learning`: Running a deep learning model
 
 3. Run:
-- Change to folder containing `intensity_classifier.py`
-- Execute command: `python3 intensity_classifier.py`
-
+- Change to folder `classical` and run command: python3 classical_clf.py
+- Change to folder `deep_learning` and run command: python3 cnn.py
