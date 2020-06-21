@@ -73,7 +73,6 @@ train_Y = train['Intensity Class']
 test_X = dev['Tweet_Final']
 test_Y = dev['Intensity Class']
 
-# Tokenizer
 # The maximum number of words to be used
 MAX_NB_WORDS = 50000
 MAX_SEQUENCE_LENGTH = 250
@@ -87,6 +86,8 @@ train_X_sequences = pad_sequences(tokenizer.texts_to_sequences(train_X), maxlen=
 test_X_sequences = pad_sequences(tokenizer.texts_to_sequences(test_X), maxlen=MAX_SEQUENCE_LENGTH)
 print('Shape of train_X_sequences tensor:', train_X_sequences.shape)
 print('Shape of test_X_sequences tensor:', test_X_sequences.shape)
+# print(train_X_sequences[0:3])
+# print(test_X_sequences[0:3])
 
 train_Y = pd.get_dummies(train_Y).values
 test_Y = pd.get_dummies(test_Y).values
@@ -95,35 +96,14 @@ print('Shape of test_Y tensor:', test_Y.shape)
 # print(train_Y[0:3])
 # print(test_Y[0:3])
 
-# word embedding
-nlp = spacy.load('en_core_web_lg')
-text_embedding = np.zeros((len(word_index) + 1, 300))
-for word, i in word_index.items():
-    text_embedding[i] = nlp(word).vector
-
-# building model
+# Define model
 model = Sequential()
-model.add(
-Embedding(input_dim=text_embedding.shape[0], output_dim=text_embedding.shape[1], weights=[text_embedding], input_length=MAX_SEQUENCE_LENGTH, trainable=False))
-model.add(SpatialDropout1D(0.5))
-model.add(Conv1D(filters=250, kernel_size=3,kernel_regularizer=regularizers.l2(0.00001), padding='same'))
-model.add(LeakyReLU(alpha=0.2))
-model.add(MaxPooling1D(pool_size=2))
-model.add(Bidirectional(LSTM(7,dropout=0.5, recurrent_dropout=0.5,return_sequences=True)))
-model.add(SpatialDropout1D(0.5))
-model.add(Conv1D(filters=250, kernel_size=3,kernel_regularizer=regularizers.l2(0.00001), padding='same'))
-model.add(LeakyReLU(alpha=0.2))
-model.add(MaxPooling1D(pool_size=2))
-model.add(Bidirectional(LSTM(7,dropout=0.5, recurrent_dropout=0.5,return_sequences=True)))
-model.add(SpatialDropout1D(0.5))
-model.add(Conv1D(filters=250, kernel_size=3,kernel_regularizer=regularizers.l2(0.00001), padding='same'))
-model.add(LeakyReLU(alpha=0.2))
-model.add(MaxPooling1D(pool_size=2))
-model.add(Bidirectional(LSTM(7,dropout=0.5, recurrent_dropout=0.5)))
-model.add(Dense(7,activation='softmax'))
-model.compile(optimizer='adam',loss='categorical_crossentropy', metrics=['accuracy'])
+model.add(Embedding(MAX_NB_WORDS, EMBEDDING_DIM, input_length=train_X_sequences.shape[1]))
+model.add(SpatialDropout1D(0.2))
+model.add(LSTM(100, dropout=0.2, recurrent_dropout=0.2))
+model.add(Dense(7, activation='softmax'))
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-# fit model to data
 # train
 epochs = 5
 batch_size = 64
