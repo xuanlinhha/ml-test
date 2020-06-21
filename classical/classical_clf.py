@@ -7,6 +7,7 @@ from nltk.stem import WordNetLemmatizer
 from sklearn.preprocessing import LabelEncoder
 from collections import defaultdict
 from nltk.corpus import wordnet as wn
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report, confusion_matrix
@@ -18,9 +19,10 @@ from sklearn.ensemble import RandomForestClassifier
 
 np.random.seed(500)
 
+# TEXT PROCESSING
 # remove colums
-train = pd.read_csv("2018-Valence-oc-En-train.txt", sep='\t')
-dev = pd.read_csv("2018-Valence-oc-En-dev.txt", sep='\t')
+train = pd.read_csv("../dataset/Sentiment-Analysis-Task/2018-Valence-oc-En-train.txt", sep='\t')
+dev = pd.read_csv("../dataset/Sentiment-Analysis-Task/2018-Valence-oc-En-dev.txt", sep='\t')
 train = train.drop(columns=['ID', 'Affect Dimension'])
 dev = dev.drop(columns=['ID', 'Affect Dimension'])
 
@@ -67,60 +69,65 @@ train_Y = train['Intensity Class']
 test_X = dev['Tweet_Final']
 test_Y = dev['Intensity Class']
 
-# numberize data
+# CONVERT TO NUMBERIC DATA
+# on Y
 encoder = LabelEncoder()
 train_Y = encoder.fit_transform(train_Y)
 test_Y = encoder.fit_transform(test_Y)
 
-# used to convert text to vector
+# on X
 vectorizer = TfidfVectorizer(max_features=5000)
 vectorizer.fit(train_X.append(test_X))
-
-# get vectors from text
 train_X_vectors = vectorizer.transform(train_X)
 test_X_vectors = vectorizer.transform(test_X)
 
+# TRAIN & PREDICT
 # MultinomialNB
 nb = MultinomialNB()
 nb.fit(train_X_vectors, train_Y)
-test_Y_predict = nb.predict(test_X_vectors)
+predict_Y = nb.predict(test_X_vectors)
 print("--- MultinomialNB ---")
-print(confusion_matrix(test_Y, test_Y_predict))
-print(classification_report(test_Y, test_Y_predict))
+print(confusion_matrix(test_Y, predict_Y))
+print(classification_report(test_Y, predict_Y))
+print("Accuracy Score = {}".format(accuracy_score(predict_Y, test_Y) * 100))
 print("===================")
 
 # SVM
 svc = SVC(C=1.0, kernel='linear', degree=3, gamma='auto')
 svc.fit(train_X_vectors, train_Y)
-test_Y_predict = svc.predict(test_X_vectors)
+predict_Y = svc.predict(test_X_vectors)
 print("--- SVM ---")
-print(confusion_matrix(test_Y, test_Y_predict))
-print(classification_report(test_Y, test_Y_predict))
+print(confusion_matrix(test_Y, predict_Y))
+print(classification_report(test_Y, predict_Y))
+print("Accuracy Score = {}".format(accuracy_score(predict_Y, test_Y) * 100))
 print("===================")
 
 # KNeighborsClassifier
 neigh = KNeighborsClassifier(n_neighbors=3)
 neigh.fit(train_X_vectors, train_Y)
-test_Y_predict = neigh.predict(test_X_vectors)
+predict_Y = neigh.predict(test_X_vectors)
 print("--- KNeighborsClassifier ---")
-print(confusion_matrix(test_Y, test_Y_predict))
-print(classification_report(test_Y, test_Y_predict))
+print(confusion_matrix(test_Y, predict_Y))
+print(classification_report(test_Y, predict_Y))
+print("Accuracy Score = {}".format(accuracy_score(predict_Y, test_Y) * 100))
 print("===================")
 
 # LogisticRegression
 lr = LogisticRegression(random_state=0)
 lr.fit(train_X_vectors, train_Y)
-test_Y_predict = lr.predict(test_X_vectors)
+predict_Y = lr.predict(test_X_vectors)
 print("--- LogisticRegression ---")
-print(confusion_matrix(test_Y, test_Y_predict))
-print(classification_report(test_Y, test_Y_predict))
+print(confusion_matrix(test_Y, predict_Y))
+print(classification_report(test_Y, predict_Y))
+print("Accuracy Score = {}".format(accuracy_score(predict_Y, test_Y) * 100))
 print("===================")
 
 # RandomForestClassifier
 rf = RandomForestClassifier(max_depth=2, random_state=0)
 rf.fit(train_X_vectors, train_Y)
-test_Y_predict = rf.predict(test_X_vectors)
+predict_Y = rf.predict(test_X_vectors)
 print("--- RandomForestClassifier ---")
-print(confusion_matrix(test_Y, test_Y_predict))
-print(classification_report(test_Y, test_Y_predict))
+print(confusion_matrix(test_Y, predict_Y))
+print(classification_report(test_Y, predict_Y))
+print("Accuracy Score = {}".format(accuracy_score(predict_Y, test_Y) * 100))
 print("===================")
